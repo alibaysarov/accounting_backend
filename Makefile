@@ -1,4 +1,5 @@
-
+dev:
+	fastapi dev --port=8020
 copy_env:
 	sed 's/=.*$/=/' .env > .env.example
 
