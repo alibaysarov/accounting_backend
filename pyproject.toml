@@ -1,0 +1,15 @@
+[project]
+name = "accounting-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "fastapi[all]>=0.137.0",
+    "pydantic>=2.13.4",
+    "pytest>=9.1.0",
+    "pytest-asyncio>=1.4.0",
+    "sqlalchemy>=2.0.50",
+]
