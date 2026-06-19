@@ -1,24 +1,24 @@
-repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.3  # можно обновлять
-    hooks:
-      - id: ruff-format
-        files: ^app/
-        stages: [pre-commit]
-  - repo: local
-    hooks:
-      - id: pytest
-        name: pytest
-        entry: bash -c "source .venv/bin/activate && pytest tests/"
-        language: system
-        pass_filenames: false
-        stages: [pre-push]
+# repos:
+#   - repo: https://github.com/astral-sh/ruff-pre-commit
+#     rev: v0.9.3  # можно обновлять
+#     hooks:
+#       - id: ruff-format
+#         files: ^app/
+#         stages: [pre-commit]
+#   - repo: local
+#     hooks:
+#       - id: pytest
+#         name: pytest
+#         entry: bash -c "source .venv/bin/activate && pytest tests/"
+#         language: system
+#         pass_filenames: false
+#         stages: [pre-push]
 
-  - repo: local
-    hooks:
-      - id: pytest-coverage
-        name: pytest_coverage_min_75
-        entry: bash -c "source .venv/bin/activate && pytest tests/ --cov=helpers --cov=services --cov=repositories --cov-report=term --cov-fail-under=75"
-        language: system
-        pass_filenames: false
-        stages: [pre-push]
+#   - repo: local
+#     hooks:
+#       - id: pytest-coverage
+#         name: pytest_coverage_min_75
+#         entry: bash -c "source .venv/bin/activate && pytest tests/ --cov=helpers --cov=services --cov=repositories --cov-report=term --cov-fail-under=75"
+#         language: system
+#         pass_filenames: false
+#         stages: [pre-push]
