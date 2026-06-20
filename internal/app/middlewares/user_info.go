@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"acc_backend/internal/app/helpers"
-	"acc_backend/internal/container"
+	"acc_backend/internal/service"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +11,17 @@ import (
 // userRepo :=
 
 // *model.User
-func GetUser(cnt *container.Container) gin.HandlerFunc {
+
+type AuthMiddleware struct {
+	jwtService *service.JwtService
+	userRepo   service.UserRepository
+}
+
+func NewAuthMiddleware(jwtService *service.JwtService, userRepo service.UserRepository) *AuthMiddleware {
+	return &AuthMiddleware{jwtService: jwtService, userRepo: userRepo}
+}
+
+func (mdl *AuthMiddleware) GetUser() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		prefix := "Bearer: "
@@ -30,7 +40,7 @@ func GetUser(cnt *container.Container) gin.HandlerFunc {
 			helpers.Fail(c, 401, "UnAuthorized")
 		}
 
-		userId, err := cnt.JwtService.Verify(tokenStr)
+		userId, err := mdl.jwtService.Verify(tokenStr)
 
 		if err != nil {
 			helpers.Fail(c, 401, "UnAuthorized")
@@ -38,7 +48,12 @@ func GetUser(cnt *container.Container) gin.HandlerFunc {
 		if userId == "" {
 			helpers.Fail(c, 401, "UnAuthorized")
 		}
-		c.Set("userId", userId)
+		user, err := mdl.userRepo.GetById(c.Request.Context(), userId)
+
+		if err != nil {
+			helpers.Fail(c, 401, "UnAuthorized")
+		}
+		c.Set("user", user)
 		// Pre-handler phase
 		c.Next()
 	}

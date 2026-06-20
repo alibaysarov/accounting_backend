@@ -1,6 +1,7 @@
 package container
 
 import (
+	"acc_backend/internal/app/middlewares"
 	"acc_backend/internal/handler"
 	"acc_backend/internal/repository"
 	"acc_backend/internal/service"
@@ -10,10 +11,11 @@ import (
 )
 
 type Container struct {
-	AuthHandler    *handler.AuthHandler
-	UserRepository *repository.UserRepository
-	JwtService     *service.JwtService
-	Utils          *Utils
+	AuthHandler *handler.AuthHandler
+	Utils       *Utils
+
+	// middlewares
+	AuthMiddleware *middlewares.AuthMiddleware
 	// сюда же UserHandler, ProductHandler и т.д.
 }
 
@@ -31,10 +33,11 @@ func NewContainer(db *gorm.DB, utils *Utils) *Container {
 
 	// handlers
 	authHandler := handler.NewAuthHandler(authService)
+	authMiddleware := middlewares.NewAuthMiddleware(jwtService, userRepo)
 
 	return &Container{
 		AuthHandler:    authHandler,
-		JwtService:     jwtService,
-		UserRepository: userRepo,
+		Utils:          utils,
+		AuthMiddleware: authMiddleware,
 	}
 }

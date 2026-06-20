@@ -2,14 +2,10 @@ package model
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type BaseModel struct {
-	gorm.Model
-	ID string `gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        string    `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+	CreatedAt time.Time `gorm:"not null;default:now()"`
+	UpdatedAt time.Time `gorm:"not null;default:now()"`
 }

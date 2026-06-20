@@ -3,6 +3,7 @@ package service
 import (
 	"acc_backend/internal/dto"
 	"acc_backend/internal/model"
+	"context"
 	"errors"
 	"fmt"
 
@@ -13,6 +14,7 @@ import (
 type UserRepository interface {
 	Create(fullName string, email string, password string) (string, error)
 	FindByEmail(email string) (*model.User, error)
+	GetById(ctx context.Context, id string) (*model.User, error)
 }
 
 type TokenService interface {
@@ -34,10 +36,12 @@ func (s *AuthService) Register(dto *dto.RegisterDto) (*dto.TokenPair, error) {
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		return nil, err
 	}
+
 	if user != nil {
 		return nil, errors.New("User with this email already exists!")
 	}
-	hashedPass, err := hashPassword(user.Password)
+
+	hashedPass, err := hashPassword(dto.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -68,6 +72,19 @@ func (s *AuthService) Login(email, password string) (*dto.TokenPair, error) {
 
 func (s *AuthService) Refresh(tokenPair *dto.TokenPair) (*dto.TokenPair, error) {
 	return nil, nil
+}
+
+func (s *AuthService) GetProfile(ctx context.Context, userId string) (*dto.ProfileDto, error) {
+	user, err := s.userRepo.GetById(ctx, userId)
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
+		return nil, err
+	}
+	dto := &dto.ProfileDto{
+		ID:       user.ID,
+		FullName: user.FullName,
+		Email:    user.Email,
+	}
+	return dto, nil
 }
 
 func hashPassword(password string) (string, error) {

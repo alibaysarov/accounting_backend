@@ -16,7 +16,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(fullName string, email string, password string) (string, error) {
-	user := model.User{FullName: "Jinzhu", Email: email, Password: password}
+	user := model.User{FullName: fullName, Email: email, Password: password}
 
 	ctx := context.Background()
 	err := gorm.G[model.User](r.db).Create(ctx, &user)
@@ -26,9 +26,18 @@ func (r *UserRepository) Create(fullName string, email string, password string) 
 	return user.ID, nil
 }
 
+func (r *UserRepository) GetById(ctx context.Context, id string) (*model.User, error) {
+	var user model.User
+	err := r.db.Where("id = ?", id).First(&user).Error
+	return &user, err
+}
+
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 	var user model.User
 
 	err := r.db.Where("email = ?", email).First(&user).Error
-	return &user, err
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

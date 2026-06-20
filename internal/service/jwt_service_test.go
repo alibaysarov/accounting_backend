@@ -3,7 +3,7 @@ package service
 import "testing"
 
 func TestJwtService_GeneratesTokenPair(t *testing.T) {
-	service := makeService()
+	service := makeJwtService()
 
 	userId := "user_1"
 	tokenPair, err := service.GenerateTokenPair(userId)
@@ -16,7 +16,7 @@ func TestJwtService_GeneratesTokenPair(t *testing.T) {
 }
 
 func TestJwtService_VerifyToken(t *testing.T) {
-	service := makeService()
+	service := makeJwtService()
 	userId := "user_1"
 	tokenStr, err := getAccessToken(service, userId)
 	if err != nil {
@@ -36,7 +36,7 @@ func getAccessToken(service *JwtService, userId string) (string, error) {
 	return service.generateAccessToken(userId)
 }
 
-func makeService() *JwtService {
+func makeJwtService() *JwtService {
 	service := &JwtService{
 		secretKey: []byte("secret_key"),
 	}
