@@ -10,6 +10,7 @@ import (
 type AppConfig struct {
 	DbUrl string `envconfig:"DB_URL"`
 	Port  string `envconfig:"APP_PORT"`
+	JwtKey string `envconfig:"JWT_SECRET_KEY"`
 }
 
 func (cfg *AppConfig) Init() error {

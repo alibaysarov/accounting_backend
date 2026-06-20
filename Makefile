@@ -1,5 +1,5 @@
 dev:
-	fastapi dev --port=8020
+	go run cmd/main.go
 copy_env:
 	sed 's/=.*$/=/' .env > .env.example
 

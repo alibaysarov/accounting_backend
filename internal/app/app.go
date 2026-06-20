@@ -39,8 +39,10 @@ func (app *Application) Run() error {
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
-
-	c := container.NewContainer(db)
+	utils := &container.Utils{
+		Config: app.appConfig,
+	}
+	c := container.NewContainer(db, utils)
 
 	router := routers.NewRouter(c)
 	if app.appConfig.Port == "" {

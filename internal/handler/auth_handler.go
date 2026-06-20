@@ -1,9 +1,13 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"acc_backend/internal/dto"
+
+	"github.com/gin-gonic/gin"
+)
 
 type AuthService interface {
-	Login(email, password string) (string, error)
+	Login(email, password string) (*dto.TokenPair, error)
 }
 
 type AuthHandler struct {

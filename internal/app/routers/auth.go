@@ -1,10 +1,14 @@
 package routers
 
-import "github.com/gin-gonic/gin"
+import (
+	"acc_backend/internal/container"
 
-func RegisterAuthRoutes(rg *gin.RouterGroup) {
+	"github.com/gin-gonic/gin"
+)
+
+func RegisterAuthRoutes(rg *gin.RouterGroup, c *container.Container) {
 	auth := rg.Group("/auth")
 	{
-		auth.POST("/login")
+		auth.POST("/login", c.AuthHandler.Login)
 	}
 }

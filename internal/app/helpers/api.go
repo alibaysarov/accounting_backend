@@ -35,9 +35,9 @@ func OK(c *gin.Context, data interface{}) {
 }
 
 // Fail sends an error response.
-func Fail(c *gin.Context, status int, code, message string) {
+func Fail(c *gin.Context, status int, message string) {
 	c.JSON(status, Response{
 		Success: false,
-		Error:   &ErrorInfo{Code: code, Message: message},
+		Error:   &ErrorInfo{Code: string(status), Message: message},
 	})
 }
