@@ -56,9 +56,14 @@ func (s *AuthService) Login(email, password string) (*dto.TokenPair, error) {
 
 	// логика логина
 	user, err := s.userRepo.FindByEmail(email)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, fmt.Errorf("User with email %s not found", email)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("User with email %s not found", email)
+		}
+		return nil, err
 	}
+
 	if comparePassword(password, user.Password) {
 		pair, err := s.tokenService.GenerateTokenPair(user.ID)
 		if err != nil {
@@ -71,13 +76,20 @@ func (s *AuthService) Login(email, password string) (*dto.TokenPair, error) {
 }
 
 func (s *AuthService) Refresh(tokenPair *dto.TokenPair) (*dto.TokenPair, error) {
-	return nil, nil
+	pair, err := s.tokenService.Refresh(tokenPair)
+	if err != nil {
+		return nil, err
+	}
+	return pair, nil
 }
 
 func (s *AuthService) GetProfile(ctx context.Context, userId string) (*dto.ProfileDto, error) {
 	user, err := s.userRepo.GetById(ctx, userId)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
-		return nil, err
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("user not found: %w", err)
+		}
+		return nil, fmt.Errorf("failed to get profile: %w", err)
 	}
 	dto := &dto.ProfileDto{
 		ID:       user.ID,

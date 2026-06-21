@@ -29,7 +29,11 @@ func (r *UserRepository) Create(fullName string, email string, password string) 
 func (r *UserRepository) GetById(ctx context.Context, id string) (*model.User, error) {
 	var user model.User
 	err := r.db.Where("id = ?", id).First(&user).Error
-	return &user, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {

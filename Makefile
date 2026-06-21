@@ -15,7 +15,15 @@ migrate-up:
 migrate-down:
 	goose -dir migrations postgres "$(DB_URL)" down
 
+pre-commit:
+	pre-commit run --all-files --hook-stage pre-commit
 
+pre-push:
+	pre-commit run --all-files --hook-stage pre-push
+
+show-coverage:
+	go test ./internal/service/... ./internal/repository/... -coverprofile=coverage.out
+	go tool cover -func=coverage.out | grep -v "100.0%"
 # Создать миграцию автоматически (после изменения модели)
 # alembic revision --autogenerate -m "add users table"
 

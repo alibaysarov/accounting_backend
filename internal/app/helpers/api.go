@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,8 +37,9 @@ func OK(c *gin.Context, data interface{}) {
 
 // Fail sends an error response.
 func Fail(c *gin.Context, status int, message string) {
+	s := strconv.Itoa(status)
 	c.JSON(status, Response{
 		Success: false,
-		Error:   &ErrorInfo{Code: string(status), Message: message},
+		Error:   &ErrorInfo{Code: s, Message: message},
 	})
 }

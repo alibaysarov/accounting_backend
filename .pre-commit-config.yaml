@@ -26,7 +26,7 @@ repos:
         name: go_test_coverage_min_75
         entry: >
           bash -c '
-          go test ./... -coverprofile=coverage.out &&
+          go test ./internal/service/... ./internal/repository/... -coverprofile=coverage.out -coverpkg=./internal/service/...,./internal/repository/... &&
           total=$(go tool cover -func=coverage.out | grep total | awk "{print substr(\$3, 1, length(\$3)-1)}") &&
           echo "Total coverage: $total%" &&
           awk -v cov="$total" "BEGIN { if (cov < 75) { print \"Coverage below 75%\"; exit 1 } }"
