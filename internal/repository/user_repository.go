@@ -3,9 +3,13 @@ package repository
 import (
 	"acc_backend/internal/model"
 	"context"
+	"errors"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
+
+var ErrUserAlreadyExists = errors.New("user with this email already exists")
 
 type UserRepository struct {
 	db *gorm.DB
@@ -21,6 +25,10 @@ func (r *UserRepository) Create(fullName string, email string, password string) 
 	ctx := context.Background()
 	err := gorm.G[model.User](r.db).Create(ctx, &user)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return "", ErrUserAlreadyExists
+		}
 		return "", err
 	}
 	return user.ID, nil

@@ -8,8 +8,10 @@ import (
 )
 
 type AppConfig struct {
-	DbUrl  string `envconfig:"DB_URL"`
-	Port   string `envconfig:"APP_PORT"`
+	DbUrl   string `envconfig:"DB_URL"`
+	Port    string `envconfig:"APP_PORT"`
+	GinMode string `envconfig:"GIN_MODE" default:"release"`
+
 	JwtKey string `envconfig:"JWT_SECRET_KEY"`
 }
 

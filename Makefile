@@ -3,6 +3,10 @@ export
 
 dev:
 	go run cmd/main.go
+
+pprof:
+	go tool pprof -seconds 30 http://localhost:6060/debug/pprof/profile
+
 copy_env:
 	sed 's/=.*$/=/' .env > .env.example
 

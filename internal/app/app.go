@@ -8,10 +8,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -31,6 +33,7 @@ func (app *Application) Run() error {
 	if err != nil {
 		return err
 	}
+	gin.SetMode(app.appConfig.GinMode)
 
 	db, err := app.dbInit()
 	if err != nil {
@@ -55,6 +58,10 @@ func (app *Application) Run() error {
 
 	go app.startServer(server)
 
+	if app.appConfig.GinMode == "debug" {
+		go startPprofServer("localhost:6060")
+	}
+
 	<-ctx.Done() // ждём сигнал
 	fmt.Println("shutting down...")
 
@@ -75,10 +82,29 @@ func (app *Application) startServer(server *http.Server) {
 
 }
 
+func (app *Application) restrictConn(db *gorm.DB) error {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return err
+	}
+	// Ограничиваем пул так, чтобы оставался запас под другие нужды
+	// (миграции, админ-подключения, k6 cleanup и т.д.)
+	sqlDB.SetMaxOpenConns(80)                  // максимум одновременных соединений
+	sqlDB.SetMaxIdleConns(20)                  // сколько держим "прогретыми" в простое
+	sqlDB.SetConnMaxLifetime(30 * time.Minute) // пересоздавать соединения раз в N времени
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
+	return nil
+}
+
 func (app *Application) dbInit() (*gorm.DB, error) {
 	url := app.appConfig.DbUrl
 
 	db, err := gorm.Open(postgres.Open(url), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	err = app.restrictConn(db)
 	if err != nil {
 		return nil, err
 	}

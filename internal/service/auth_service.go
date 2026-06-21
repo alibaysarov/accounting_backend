@@ -3,6 +3,7 @@ package service
 import (
 	"acc_backend/internal/dto"
 	"acc_backend/internal/model"
+	"acc_backend/internal/repository"
 	"context"
 	"errors"
 	"fmt"
@@ -32,14 +33,14 @@ func NewAuthService(userRepo UserRepository, tokenService TokenService) *AuthSer
 }
 
 func (s *AuthService) Register(dto *dto.RegisterDto) (*dto.TokenPair, error) {
-	user, err := s.userRepo.FindByEmail(dto.Email)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
-		return nil, err
-	}
+	// user, err := s.userRepo.FindByEmail(dto.Email)
+	// if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
+	// 	return nil, err
+	// }
 
-	if user != nil {
-		return nil, errors.New("User with this email already exists!")
-	}
+	// if user != nil {
+	// 	return nil, errors.New("User with this email already exists!")
+	// }
 
 	hashedPass, err := hashPassword(dto.Password)
 	if err != nil {
@@ -47,6 +48,9 @@ func (s *AuthService) Register(dto *dto.RegisterDto) (*dto.TokenPair, error) {
 	}
 	userId, err := s.userRepo.Create(dto.FullName, dto.Email, hashedPass)
 	if err != nil {
+		if errors.Is(err, repository.ErrUserAlreadyExists) {
+			return nil, errors.New("user with this email already exists")
+		}
 		return nil, err
 	}
 	return s.tokenService.GenerateTokenPair(userId)
@@ -101,7 +105,9 @@ func (s *AuthService) GetProfile(ctx context.Context, userId string) (*dto.Profi
 
 func hashPassword(password string) (string, error) {
 	// GenerateFromPassword automatically generates its own secure salt
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	// cost := bcrypt.DefaultCost
+	cost := 8
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 	if err != nil {
 		return "", err
 	}
