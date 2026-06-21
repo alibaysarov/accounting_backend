@@ -33,15 +33,6 @@ func NewAuthService(userRepo UserRepository, tokenService TokenService) *AuthSer
 }
 
 func (s *AuthService) Register(dto *dto.RegisterDto) (*dto.TokenPair, error) {
-	// user, err := s.userRepo.FindByEmail(dto.Email)
-	// if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
-	// 	return nil, err
-	// }
-
-	// if user != nil {
-	// 	return nil, errors.New("User with this email already exists!")
-	// }
-
 	hashedPass, err := hashPassword(dto.Password)
 	if err != nil {
 		return nil, err
@@ -105,7 +96,6 @@ func (s *AuthService) GetProfile(ctx context.Context, userId string) (*dto.Profi
 
 func hashPassword(password string) (string, error) {
 	// GenerateFromPassword automatically generates its own secure salt
-	// cost := bcrypt.DefaultCost
 	cost := 8
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 	if err != nil {

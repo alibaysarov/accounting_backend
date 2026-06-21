@@ -3,6 +3,7 @@ package service
 import (
 	"acc_backend/internal/dto"
 	"acc_backend/internal/model"
+	"acc_backend/internal/repository"
 	"context"
 	"errors"
 	"strings"
@@ -169,16 +170,12 @@ func TestAuthService_Register(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		findByEmail func(email string) (*model.User, error)
 		create      func(fullName, email, password string) (string, error)
 		wantErr     bool
 		errContains string
 	}{
 		{
 			name: "success",
-			findByEmail: func(email string) (*model.User, error) {
-				return nil, gorm.ErrRecordNotFound
-			},
 			create: func(fullName, email, password string) (string, error) {
 				return "user-id-123", nil
 			},
@@ -186,28 +183,14 @@ func TestAuthService_Register(t *testing.T) {
 		},
 		{
 			name: "user already exists",
-			findByEmail: func(email string) (*model.User, error) {
-
-				return &model.User{
-					BaseModel: model.BaseModel{ID: "existing-id"},
-					Email:     email}, nil
+			create: func(fullName, email, password string) (string, error) {
+				return "", repository.ErrUserAlreadyExists
 			},
 			wantErr:     true,
 			errContains: "already exists",
 		},
 		{
-			name: "repo error on find",
-			findByEmail: func(email string) (*model.User, error) {
-				return nil, errors.New("db connection failed")
-			},
-			wantErr:     true,
-			errContains: "db connection failed",
-		},
-		{
 			name: "repo error on create",
-			findByEmail: func(email string) (*model.User, error) {
-				return nil, gorm.ErrRecordNotFound
-			},
 			create: func(fullName, email, password string) (string, error) {
 				return "", errors.New("insert failed")
 			},
@@ -219,8 +202,7 @@ func TestAuthService_Register(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := &MockUserRepository{
-				FindByEmailFn: tt.findByEmail,
-				CreateFn:      tt.create,
+				CreateFn: tt.create,
 			}
 
 			service := makeAuthService(mockRepo)
@@ -244,6 +226,7 @@ func TestAuthService_Register(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
+
 			if result == nil {
 				t.Fatal("expected token pair, got nil")
 			}
